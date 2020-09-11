@@ -39,7 +39,7 @@ export default {
       const query = {
         url: this.url.trim(),
       };
-      return new URL(`warning?${queryString.stringify(query)}`, window.location).toString();
+      return new URL(`warning.html?${queryString.stringify(query)}`, window.location).toString();
     },
   },
   methods: {
