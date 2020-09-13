@@ -6,20 +6,32 @@
       </span>
       creator
     </div>
-    <div class="form">
+    <form class="form" @submit.prevent="copy" autocomplete="off">
       <label for="url-input" class="url__label">Target URL</label>
       <input type="url" class="url__input" id="url-input" placeholder="https://example.com/" v-model="url" />
       <div class="buttons">
-        <a class="preview-button" :href="warningUrl" :class="{
-          'preview-button--disabled': !valid
-        }">
-          Preview
-        </a>
-        <button class="copy-button" :disabled="!valid" @click="copy">
-          Copy link
+        <button
+          class="copy-button"
+          :class="{
+            'copy-button--copied': copied,
+          }"
+          :disabled="!valid"
+          type="submit"
+        >
+          <span class="copy-button__text" :aria-hidden="copied">Copy link</span>
+          <span class="copy-button__copied" :aria-hidden="!copied">Copied!</span>
         </button>
+        <a
+          class="preview-button"
+          :href="warningUrl"
+          :class="{
+            'preview-button--disabled': !valid
+          }"
+        >
+          Show this warning
+        </a>
       </div>
-    </div>
+    </form>
   </div>
 </template>
 
@@ -29,6 +41,7 @@ import queryString from 'querystring';
 export default {
   data: () => ({
     url: '',
+    copied: false,
   }),
   computed: {
     valid() {
@@ -44,8 +57,12 @@ export default {
   },
   methods: {
     copy() {
-      if (!this.valid) return;
+      if (!this.valid || this.copied) return;
       this.$clipboard(this.warningUrl);
+      this.copied = true;
+      setTimeout(() => {
+        this.copied = false;
+      }, 1500);
     },
   },
 };
@@ -119,47 +136,76 @@ export default {
     .copy-button {
       text-decoration: none;
       font-size: 12pt;
-      padding: 7px 15px;
-      border-radius: 4px;
-      display: block;
-      text-transform: uppercase;
-      color: white;
-      border: 1px solid white;
-      transition: background-color 200ms, color 200ms, border 200ms;
-      background-color: transparent;
-      cursor: pointer;
-
-      &:disabled {
-        color: #666;
-        border-color: #444;
-        cursor: default;
-      }
-
-      &:not(:disabled):hover {
-        background-color: #fff2;
-      }
-    }
-
-    .preview-button {
-      background-color: #CC2851;
-      color: white;
-      text-decoration: none;
-      font-size: 12pt;
       padding: 8px 16px;
       border-radius: 4px;
-      display: block;
+      display: grid;
       text-transform: uppercase;
-      transition: background-color 200ms, color 200ms;
+      transition: background-color 200ms, color 200ms, border 200ms;
+      cursor: pointer;
+      background-color: #CC2851;
+      color: white;
+      border: none;
       margin-left: 8px;
+      line-height: 16pt;
 
-      &--disabled {
+      &:disabled {
         background-color: #444;
         color: #bbb;
         cursor: default;
       }
 
-      &:not(&--disabled):hover {
+      &:not(:disabled):not(.copy-button--copied):hover {
         background-color: #DB4369;
+      }
+
+      &__text {
+        line-height: inherit;
+        grid-column: 1;
+        grid-row: 1;
+        opacity: 1;
+      }
+
+      &__copied {
+        line-height: inherit;
+        grid-column: 1;
+        grid-row: 1;
+        opacity: 0;
+      }
+
+      &--copied {
+        cursor: default;
+
+        .copy-button__text {
+          opacity: 0;
+        }
+
+        .copy-button__copied {
+          opacity: 1;
+        }
+      }
+    }
+
+    .preview-button {
+      text-decoration: none;
+      font-size: 12pt;
+      padding: 7px 15px;
+      border-radius: 4px;
+      display: block;
+      text-transform: uppercase;
+      transition: background-color 200ms, color 200ms;
+      color: white;
+      border: 1px solid white;
+      background-color: transparent;
+      line-height: 16pt;
+
+      &--disabled {
+        color: #666;
+        border-color: #444;
+        cursor: default;
+      }
+
+      &:not(.preview-button--disabled):hover {
+        background-color: #fff2;
       }
     }
   }
