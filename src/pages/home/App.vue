@@ -9,6 +9,14 @@
     <form class="form" @submit.prevent="copy" autocomplete="off">
       <label for="url-input" class="url__label">Target URL</label>
       <input type="url" class="url__input" id="url-input" placeholder="https://example.com/" v-model="url" />
+      <div
+        class="invalid-url"
+        :class="{
+          'invalid-url--hidden': urlValid || urlEmpty
+        }"
+      >
+        Invalid URL
+      </div>
       <div class="buttons">
         <button
           class="copy-button"
@@ -28,7 +36,7 @@
             'preview-button--disabled': !valid
           }"
         >
-          Show this warning
+          Open warning
         </a>
       </div>
     </form>
@@ -37,6 +45,7 @@
 
 <script>
 import queryString from 'querystring';
+import isUrl from 'is-url';
 
 export default {
   data: () => ({
@@ -44,8 +53,14 @@ export default {
     copied: false,
   }),
   computed: {
+    urlValid() {
+      return isUrl(this.url.trim());
+    },
+    urlEmpty() {
+      return this.url.trim() === '';
+    },
     valid() {
-      return this.url.trim() !== '';
+      return this.urlValid && !this.urlEmpty;
     },
     warningUrl() {
       if (!this.valid) return null;
@@ -128,10 +143,20 @@ export default {
     }
   }
 
+  .invalid-url {
+    color: #CC2851;
+    font-size: 10pt;
+    margin-top: 6px;
+
+    &--hidden {
+      visibility: hidden;
+    }
+  }
+
   .buttons {
     display: flex;
     flex-direction: row-reverse;
-    margin-top: 24px;
+    margin-top: 10px;
 
     .copy-button {
       text-decoration: none;
